@@ -9,7 +9,7 @@ class Pedido {
         this.longitudDestino = longitudDestino;
         this.token = token;
         this.items = items;
-        this.estado = 'pendiente';
+        this.estado = 'pendiente'; //la creacion del objeto pedido comienza si o si con estado pendiente.
     }
 
     obtenerEstado() {
