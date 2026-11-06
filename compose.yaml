@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: logistica
+      POSTGRES_PASSWORD: logistica
+      POSTGRES_DB: logistica
+    ports:
+      - "5432:5432"
+    volumes:
+      - datos-db:/var/lib/postgresql/data
+
+volumes:
+  datos-db:
