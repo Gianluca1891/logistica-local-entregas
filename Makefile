@@ -1,4 +1,4 @@
-.PHONY: build shell down
+.PHONY: build shell down reset
 
 build:
 	docker compose up -d --build
@@ -8,3 +8,7 @@ shell:
 
 down:
 	docker compose down
+
+reset:
+	docker compose down -v
+	docker compose up -d --build
