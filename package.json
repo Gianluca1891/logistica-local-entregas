@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "lint": "eslint ."
+  "test": "jest tests/unitarias",
+  "test:integracion": "jest tests/integracion",
+  "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -18,5 +19,8 @@
   },
   "jest": {
     "testEnvironment": "node"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }
