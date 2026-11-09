@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
   "test": "jest tests/unitarias",
-  "test:integracion": "jest tests/integracion",
+  "test:integracion": "jest tests/integracion --runInBand",
   "lint": "eslint ."
   },
   "keywords": [],
