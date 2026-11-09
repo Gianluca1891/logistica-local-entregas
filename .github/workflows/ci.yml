@@ -6,6 +6,17 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
   tests:
     runs-on: ubuntu-latest
 
@@ -31,7 +42,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run lint
       - run: npm test
       - name: Crear esquema de la base
         run: psql postgres://logistica:logistica@localhost:5432/logistica -f db/schema.sql
