@@ -38,6 +38,14 @@ class ProductoRepositorio {
         return resultado.rows.map(aProducto);
     }
 
+    async buscarParaActualizar(ids) {
+        const resultado = await this.db.query(
+            'SELECT * FROM productos WHERE id = ANY($1) ORDER BY id FOR UPDATE',
+            [ids]
+        );
+        return resultado.rows.map(aProducto);
+    }
+
     async actualizarStock(producto) {
         await this.db.query('UPDATE productos SET stock = $1 WHERE id = $2', [producto.stock, producto.id]);
     }

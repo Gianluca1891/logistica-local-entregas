@@ -1,5 +1,5 @@
 class Pedido {
-    constructor({ id, comercioId, nombreCliente, contactoCliente, direccionDestino, latitudDestino, longitudDestino, token, items = [] }) {
+    constructor({ id, comercioId, nombreCliente, contactoCliente, direccionDestino, latitudDestino, longitudDestino, token, estado = 'pendiente', items = [] }) {
         this.id = id;
         this.comercioId = comercioId;
         this.nombreCliente = nombreCliente;
@@ -9,7 +9,7 @@ class Pedido {
         this.longitudDestino = longitudDestino;
         this.token = token;
         this.items = items;
-        this.estado = 'pendiente'; //la creacion del objeto pedido comienza si o si con estado pendiente.
+        this.estado = estado;
     }
 
     obtenerEstado() {
