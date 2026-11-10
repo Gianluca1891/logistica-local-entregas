@@ -49,6 +49,20 @@ describe('POST /pedidos', () => {
         expect(falso.recibidos).toHaveLength(0);
     });
 
+    test('responde 400 si el JSON esta mal formado', async () => {
+        const falso = crearPedidoFalso(() => null);
+        const app = crearApp({ crearPedido: falso.crearPedido });
+
+        const respuesta = await request(app)
+            .post('/pedidos')
+            .set('Content-Type', 'application/json')
+            .send('{malformado');
+
+        expect(respuesta.status).toBe(400);
+        expect(respuesta.body).toEqual({ error: 'JSON invalido' });
+        expect(falso.recibidos).toHaveLength(0);
+    });
+
     test('responde 400 con el mensaje si el servicio rechaza el pedido', async () => {
         const falso = crearPedidoFalso(() => {
             throw new Error('Stock insuficiente');

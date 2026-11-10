@@ -3,6 +3,7 @@ const express = require("express");
 const ERRORES_DE_NEGOCIO = [
     "Datos invalidos",
     "El pedido debe tener al menos un producto",
+    "Producto repetido en el pedido",
     "Producto inexistente",
     "Todos los productos deben ser del mismo comercio",
     "Cantidad invalida",
@@ -58,6 +59,9 @@ function crearApp({ crearPedido } = {}) {
     app.use((error, req, res, next) => {
         if (res.headersSent) {
             return next(error);
+        }
+        if (error.type === "entity.parse.failed") {
+            return res.status(400).json({ error: "JSON invalido" });
         }
         if (ERRORES_DE_NEGOCIO.includes(error.message)) {
             return res.status(400).json({ error: error.message });
