@@ -53,6 +53,24 @@ describe('CrearPedido', () => {
         );
     });
 
+    test('rechaza un producto repetido en el pedido', async () => {
+        const yerba = new Producto({ id: 10, comercioId: 1, nombre: 'Yerba', stock: 5 });
+        const dobles = crearDobles([yerba]);
+        const servicio = new CrearPedido({ unidadDeTrabajo: dobles.unidadDeTrabajo });
+
+        await expect(
+            servicio.ejecutar({
+                ...datosCliente,
+                items: [
+                    { productoId: 10, cantidad: 1 },
+                    { productoId: 10, cantidad: 1 },
+                ],
+            })
+        ).rejects.toThrow('Producto repetido en el pedido');
+
+        expect(yerba.stock).toBe(5);
+    });
+
     test('rechaza productos de otro comercio', async () => {
         const ajeno = new Producto({ id: 20, comercioId: 2, nombre: 'Gaseosa', stock: 5 });
         const dobles = crearDobles([ajeno]);

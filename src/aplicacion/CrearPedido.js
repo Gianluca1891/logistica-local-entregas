@@ -12,9 +12,12 @@ class CrearPedido {
         if (!datos.items || datos.items.length === 0) {
             throw new Error('El pedido debe tener al menos un producto');
         }
+        const ids = datos.items.map((item) => item.productoId);
+        if (new Set(ids).size !== ids.length) {
+            throw new Error('Producto repetido en el pedido');
+        }
 
         return this.unidadDeTrabajo.ejecutar(async ({ productos, pedidos }) => {
-            const ids = datos.items.map((item) => item.productoId);
             const encontrados = await productos.buscarParaActualizar(ids);
 
             const items = datos.items.map(({ productoId, cantidad }) => {
