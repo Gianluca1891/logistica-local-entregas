@@ -1,13 +1,19 @@
 const pool = require('./infraestructura/db');
 const UnidadDeTrabajo = require('./infraestructura/UnidadDeTrabajo');
 const PedidoRepositorio = require('./infraestructura/PedidoRepositorio');
+const UsuarioRepositorio = require('./infraestructura/UsuarioRepositorio');
 const CrearPedido = require('./aplicacion/CrearPedido');
+const IniciarSesion = require('./aplicacion/IniciarSesion');
 const crearApp = require('./api/app');
 
 const unidadDeTrabajo = new UnidadDeTrabajo(pool);
 const crearPedido = new CrearPedido({ unidadDeTrabajo });
 const pedidos = new PedidoRepositorio(pool);
-const app = crearApp({ crearPedido, pedidos });
+const iniciarSesion = new IniciarSesion({
+    usuarios: new UsuarioRepositorio(pool),
+    secreto: process.env.JWT_SECRETO || 'secreto-solo-para-desarrollo',
+});
+const app = crearApp({ crearPedido, pedidos, iniciarSesion });
 
 const puerto = process.env.PORT || 3000;
 app.listen(puerto, () => {

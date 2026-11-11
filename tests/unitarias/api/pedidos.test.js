@@ -49,6 +49,16 @@ describe('POST /pedidos', () => {
         expect(falso.recibidos).toHaveLength(0);
     });
 
+    test('responde 400 si no se envia cuerpo', async () => {
+        const falso = crearPedidoFalso(() => null);
+        const app = crearApp({ crearPedido: falso.crearPedido });
+
+        const respuesta = await request(app).post('/pedidos');
+
+        expect(respuesta.status).toBe(400);
+        expect(respuesta.body).toEqual({ error: 'Datos invalidos' });
+    });
+
     test('responde 400 si el JSON esta mal formado', async () => {
         const falso = crearPedidoFalso(() => null);
         const app = crearApp({ crearPedido: falso.crearPedido });
