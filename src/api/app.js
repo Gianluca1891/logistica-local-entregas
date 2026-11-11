@@ -1,14 +1,15 @@
 const express = require("express");
 
-const ERRORES_DE_NEGOCIO = [
-    "Datos invalidos",
-    "El pedido debe tener al menos un producto",
-    "Producto repetido en el pedido",
-    "Producto inexistente",
-    "Todos los productos deben ser del mismo comercio",
-    "Cantidad invalida",
-    "Stock insuficiente",
-];
+const ERRORES_CONOCIDOS = {
+    "Datos invalidos": 400,
+    "El pedido debe tener al menos un producto": 400,
+    "Producto repetido en el pedido": 400,
+    "Producto inexistente": 400,
+    "Todos los productos deben ser del mismo comercio": 400,
+    "Cantidad invalida": 400,
+    "Stock insuficiente": 400,
+    "Credenciales invalidas": 401,
+};
 
 function leerPedido(body) {
     const datos = {
@@ -37,7 +38,7 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido, pedidos } = {}) {
+function crearApp({ crearPedido, pedidos, iniciarSesion } = {}) {
     const app = express();
     app.use(express.json());
 
@@ -45,15 +46,21 @@ function crearApp({ crearPedido, pedidos } = {}) {
         res.json({ estado: "ok" });
     });
 
+    app.post("/login", async (req, res) => {
+        const { email, password } = req.body ?? {};
+        if (typeof email !== "string" || typeof password !== "string") {
+            throw new Error("Datos invalidos");
+        }
+        res.json(await iniciarSesion.ejecutar({ email, password }));
+    });
+
     app.post("/pedidos", async (req, res) => {
-        const pedido = await crearPedido.ejecutar(leerPedido(req.body));
-        res
-            .status(201)
-            .json({
-                id: pedido.id,
-                token: pedido.token,
-                estado: pedido.obtenerEstado(),
-            });
+        const pedido = await crearPedido.ejecutar(leerPedido(req.body ?? {}));
+        res.status(201).json({
+            id: pedido.id,
+            token: pedido.token,
+            estado: pedido.obtenerEstado(),
+        });
     });
 
     app.get("/pedidos/:token", async (req, res) => {
@@ -70,7 +77,6 @@ function crearApp({ crearPedido, pedidos } = {}) {
         });
     });
 
-
     app.use((error, req, res, next) => {
         if (res.headersSent) {
             return next(error);
@@ -78,8 +84,9 @@ function crearApp({ crearPedido, pedidos } = {}) {
         if (error.type === "entity.parse.failed") {
             return res.status(400).json({ error: "JSON invalido" });
         }
-        if (ERRORES_DE_NEGOCIO.includes(error.message)) {
-            return res.status(400).json({ error: error.message });
+        const status = ERRORES_CONOCIDOS[error.message];
+        if (status) {
+            return res.status(status).json({ error: error.message });
         }
         console.error(error);
         res.status(500).json({ error: "Error interno" });
