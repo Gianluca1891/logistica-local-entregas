@@ -1,4 +1,4 @@
-.PHONY: build shell down reset
+.PHONY: build shell down reset demo
 
 build:
 	docker compose up -d --build
@@ -12,3 +12,6 @@ down:
 reset:
 	docker compose down -v
 	docker compose up -d --build
+
+demo:
+	docker compose exec -T db psql -U logistica < db/datos-demo.sql
