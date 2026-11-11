@@ -37,7 +37,7 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido } = {}) {
+function crearApp({ crearPedido, pedidos } = {}) {
     const app = express();
     app.use(express.json());
 
@@ -55,6 +55,21 @@ function crearApp({ crearPedido } = {}) {
                 estado: pedido.obtenerEstado(),
             });
     });
+
+    app.get("/pedidos/:token", async (req, res) => {
+        const pedido = await pedidos.buscarPorToken(req.params.token);
+        if (!pedido) {
+            return res.status(404).json({ error: "Pedido no encontrado" });
+        }
+        res.json({
+            id: pedido.id,
+            estado: pedido.obtenerEstado(),
+            direccionDestino: pedido.direccionDestino,
+            latitudDestino: pedido.latitudDestino,
+            longitudDestino: pedido.longitudDestino,
+        });
+    });
+
 
     app.use((error, req, res, next) => {
         if (res.headersSent) {
