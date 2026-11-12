@@ -6,14 +6,12 @@ const CrearPedido = require('./aplicacion/CrearPedido');
 const IniciarSesion = require('./aplicacion/IniciarSesion');
 const crearApp = require('./api/app');
 
+const secreto = process.env.JWT_SECRETO || 'secreto-solo-para-desarrollo';
 const unidadDeTrabajo = new UnidadDeTrabajo(pool);
 const crearPedido = new CrearPedido({ unidadDeTrabajo });
 const pedidos = new PedidoRepositorio(pool);
-const iniciarSesion = new IniciarSesion({
-    usuarios: new UsuarioRepositorio(pool),
-    secreto: process.env.JWT_SECRETO || 'secreto-solo-para-desarrollo',
-});
-const app = crearApp({ crearPedido, pedidos, iniciarSesion });
+const iniciarSesion = new IniciarSesion({ usuarios: new UsuarioRepositorio(pool), secreto });
+const app = crearApp({ crearPedido, pedidos, iniciarSesion, secreto });
 
 const puerto = process.env.PORT || 3000;
 app.listen(puerto, () => {
