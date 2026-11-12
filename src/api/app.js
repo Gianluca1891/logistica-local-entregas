@@ -1,4 +1,5 @@
 const express = require("express");
+const crearAutenticacion = require("./autenticacion");
 
 const ERRORES_CONOCIDOS = {
     "Datos invalidos": 400,
@@ -38,8 +39,9 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido, pedidos, iniciarSesion } = {}) {
+function crearApp({ crearPedido, pedidos, iniciarSesion, secreto } = {}) {
     const app = express();
+    const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
 
     app.get("/salud", (req, res) => {
@@ -75,6 +77,21 @@ function crearApp({ crearPedido, pedidos, iniciarSesion } = {}) {
             latitudDestino: pedido.latitudDestino,
             longitudDestino: pedido.longitudDestino,
         });
+    });
+
+    app.get("/comercio/pedidos", requiereRol("comercio"), async (req, res) => {
+        const lista = await pedidos.listarPorComercio(req.usuario.comercioId);
+        res.json(
+            lista.map((pedido) => ({
+                id: pedido.id,
+                estado: pedido.obtenerEstado(),
+                nombreCliente: pedido.nombreCliente,
+                contactoCliente: pedido.contactoCliente,
+                direccionDestino: pedido.direccionDestino,
+                latitudDestino: pedido.latitudDestino,
+                longitudDestino: pedido.longitudDestino,
+            }))
+        );
     });
 
     app.use((error, req, res, next) => {
