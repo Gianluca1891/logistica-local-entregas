@@ -40,7 +40,7 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido, pedidos, iniciarSesion, secreto } = {}) {
+function crearApp({ crearPedido, pedidos, productos, iniciarSesion, secreto } = {}) {
     const app = express();
     const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
@@ -65,6 +65,10 @@ function crearApp({ crearPedido, pedidos, iniciarSesion, secreto } = {}) {
             token: pedido.token,
             estado: pedido.obtenerEstado(),
         });
+    });
+
+    app.get("/productos", async (req, res) => {
+        res.json(await productos.listarConComercio());
     });
 
     app.get("/pedidos/:token", async (req, res) => {
