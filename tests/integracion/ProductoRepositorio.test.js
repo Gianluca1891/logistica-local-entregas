@@ -63,4 +63,17 @@ describe('ProductoRepositorio', () => {
 
         await expect(repositorio.actualizarStock(producto)).rejects.toThrow('productos_stock_check');
     });
+    
+    test('listarConComercio devuelve los productos con el nombre de su comercio', async () => {
+        const kioscoId = await crearComercio('Kiosco');
+        await repositorio.crear({ comercioId: kioscoId, nombre: 'Alfajor', stock: 50 });
+        await repositorio.crear({ comercioId, nombre: 'Yerba', stock: 10 });
+
+        const lista = await repositorio.listarConComercio();
+
+        expect(lista).toEqual([
+            { id: 2, nombre: 'Yerba', stock: 10, comercioId, comercioNombre: 'Almacen' },
+            { id: 1, nombre: 'Alfajor', stock: 50, comercioId: kioscoId, comercioNombre: 'Kiosco' },
+        ]);
+    });
 });

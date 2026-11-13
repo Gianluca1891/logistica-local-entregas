@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Cliente - Logística local</title>
+        <link rel="stylesheet" href="estilos.css" />
+    </head>
+    <body>
+        <h1>Hacer un pedido</h1>
+        <a href="/">Volver al inicio</a>
+
+        <form id="pedido">
+            <label>
+                Comercio
+                <select name="comercio" id="comercio"></select>
+            </label>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody id="productos"></tbody>
+            </table>
+
+            <label>
+                Nombre
+                <input name="nombreCliente" required />
+            </label>
+            <label>
+                Teléfono o email
+                <input name="contactoCliente" required />
+            </label>
+            <label>
+                Dirección de entrega
+                <input name="direccionDestino" required />
+            </label>
+            <label>
+                Latitud
+                <input name="latitudDestino" type="number" step="any" value="-34.588" required />
+            </label>
+            <label>
+                Longitud
+                <input name="longitudDestino" type="number" step="any" value="-58.42" required />
+            </label>
+
+            <button type="submit">Hacer pedido</button>
+            <p id="error-pedido" class="error"></p>
+            <p id="resultado"></p>
+        </form>
+
+        <form id="rastreo">
+            <h2>Rastrear un pedido</h2>
+            <label>
+                Código de seguimiento
+                <input name="token" required />
+            </label>
+            <button type="submit">Rastrear</button>
+            <p id="error-rastreo" class="error"></p>
+            <p id="estado"></p>
+        </form>
+
+        <script type="module" src="cliente.js"></script>
+    </body>
+</html>

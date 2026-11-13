@@ -46,6 +46,22 @@ class ProductoRepositorio {
         return resultado.rows.map(aProducto);
     }
 
+    async listarConComercio() {
+        const resultado = await this.db.query(
+            `SELECT p.id, p.nombre, p.stock, c.id AS comercio_id, c.nombre AS comercio_nombre
+             FROM productos p
+             JOIN comercios c ON c.id = p.comercio_id
+             ORDER BY c.id, p.id`
+        );
+        return resultado.rows.map((fila) => ({
+            id: fila.id,
+            nombre: fila.nombre,
+            stock: fila.stock,
+            comercioId: fila.comercio_id,
+            comercioNombre: fila.comercio_nombre,
+        }));
+    }
+
     async actualizarStock(producto) {
         await this.db.query('UPDATE productos SET stock = $1 WHERE id = $2', [producto.stock, producto.id]);
     }
