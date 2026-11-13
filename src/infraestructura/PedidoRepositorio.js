@@ -54,6 +54,7 @@ class PedidoRepositorio {
         }
         return aPedido(resultado.rows[0]);
     }
+    
     async listarPorComercio(comercioId) {
         const resultado = await this.db.query(
             'SELECT * FROM pedidos WHERE comercio_id = $1 ORDER BY id',
