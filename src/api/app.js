@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const crearAutenticacion = require("./autenticacion");
 
@@ -43,6 +44,7 @@ function crearApp({ crearPedido, pedidos, iniciarSesion, secreto } = {}) {
     const app = express();
     const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
+    app.use(express.static(path.join(__dirname, "../../public")));
 
     app.get("/salud", (req, res) => {
         res.json({ estado: "ok" });

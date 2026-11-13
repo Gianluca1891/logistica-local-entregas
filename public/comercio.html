@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Comercio - Logística local</title>
+        <link rel="stylesheet" href="estilos.css" />
+    </head>
+    <body>
+        <h1>Mis pedidos</h1>
+        <button id="salir">Cerrar sesión</button>
+
+        <section>
+            <p id="error" class="error"></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Contacto</th>
+                        <th>Dirección</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="pedidos"></tbody>
+            </table>
+        </section>
+
+        <script type="module" src="comercio.js"></script>
+    </body>
+</html>
