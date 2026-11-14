@@ -43,7 +43,7 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido, pedidos, productos, iniciarSesion, solicitarRuta, secreto } = {}) {
+function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solicitarRuta, secreto } = {}) {
     const app = express();
     const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
@@ -106,6 +106,9 @@ function crearApp({ crearPedido, pedidos, productos, iniciarSesion, solicitarRut
     app.post("/comercio/rutas", requiereRol("comercio"), async (req, res) => {
         const ruta = await solicitarRuta.ejecutar(req.usuario.comercioId);
         res.status(202).json({ id: ruta.id, estado: ruta.estado, repartidorId: ruta.repartidorId });
+    });
+    app.get("/comercio/rutas", requiereRol("comercio"), async (req, res) => {
+        res.json(await rutas.listarPorComercio(req.usuario.comercioId));
     });
     app.use((error, req, res, next) => {
         if (res.headersSent) {
