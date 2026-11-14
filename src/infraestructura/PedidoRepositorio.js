@@ -62,6 +62,18 @@ class PedidoRepositorio {
         );
         return resultado.rows.map(aPedido);
     }
+
+    async buscarPendientesParaActualizar(comercioId) {
+        const resultado = await this.db.query(
+            "SELECT * FROM pedidos WHERE comercio_id = $1 AND estado = 'pendiente' ORDER BY id FOR UPDATE",
+            [comercioId]
+        );
+        return resultado.rows.map(aPedido);
+    }
+
+    async actualizarEstado(pedido) {
+        await this.db.query('UPDATE pedidos SET estado = $1 WHERE id = $2', [pedido.obtenerEstado(), pedido.id]);
+    }
 }
 
 module.exports = PedidoRepositorio;
