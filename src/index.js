@@ -10,6 +10,8 @@ const CrearPedido = require('./aplicacion/CrearPedido');
 const IniciarSesion = require('./aplicacion/IniciarSesion');
 const SolicitarRuta = require('./aplicacion/SolicitarRuta');
 const AplicarOrdenDeRuta = require('./aplicacion/AplicarOrdenDeRuta');
+const IniciarRuta = require('./aplicacion/IniciarRuta');
+const EntregarPedido = require('./aplicacion/EntregarPedido');
 const crearApp = require('./api/app');
 
 const secreto = process.env.JWT_SECRETO || 'secreto-solo-para-desarrollo';
@@ -29,7 +31,19 @@ const rutasCalculadas = new Worker(COLA_RUTA_CALCULADA, (trabajo) => aplicarOrde
 rutasCalculadas.on('completed', (trabajo) => console.log(`Ruta ${trabajo.data.rutaId} lista`));
 rutasCalculadas.on('failed', (trabajo, error) => console.error(`No se pudo guardar la ruta: ${error.message}`));
 rutasCalculadas.on('error', (error) => console.error('Error en el worker de rutas:', error.code || error.message));
-const app = crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solicitarRuta, secreto });
+const iniciarRuta = new IniciarRuta({ unidadDeTrabajo });
+const entregarPedido = new EntregarPedido({ unidadDeTrabajo });
+const app = crearApp({
+    crearPedido,
+    pedidos,
+    productos,
+    rutas,
+    iniciarSesion,
+    solicitarRuta,
+    iniciarRuta,
+    entregarPedido,
+    secreto,
+});
 
 const puerto = process.env.PORT || 3000;
 app.listen(puerto, () => {

@@ -9,9 +9,14 @@
     <body>
         <h1>Mi ruta</h1>
         <button id="salir">Cerrar sesión</button>
+        <button id="actualizar">Actualizar</button>
 
         <section>
-            <p>Todavía no tenés una ruta asignada.</p>
+            <p id="error" class="error"></p>
+            <p id="mensaje"></p>
+            <h2 id="titulo"></h2>
+            <button id="iniciar" hidden>Iniciar ruta</button>
+            <ol id="paradas"></ol>
         </section>
 
         <script type="module" src="repartidor.js"></script>

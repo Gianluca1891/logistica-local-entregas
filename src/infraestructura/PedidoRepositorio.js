@@ -70,6 +70,11 @@ class PedidoRepositorio {
         );
         return resultado.rows.map(aPedido);
     }
+    
+    async buscarVariosParaActualizar(ids) {
+        const resultado = await this.db.query('SELECT * FROM pedidos WHERE id = ANY($1) ORDER BY id FOR UPDATE', [ids]);
+        return resultado.rows.map(aPedido);
+    }
 
     async actualizarEstado(pedido) {
         await this.db.query('UPDATE pedidos SET estado = $1 WHERE id = $2', [pedido.obtenerEstado(), pedido.id]);

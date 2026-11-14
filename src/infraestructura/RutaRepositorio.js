@@ -53,8 +53,31 @@ class RutaRepositorio {
         }
         await this.db.query('UPDATE rutas SET estado = $1 WHERE id = $2', [ruta.estado, ruta.id]);
     }
-    
     async listarPorComercio(comercioId) {
+        return this.listar('r.comercio_id = $1', comercioId);
+    }
+
+    async buscarActivaDeRepartidor(repartidorId) {
+        const rutas = await this.listar("r.repartidor_id = $1 AND r.estado <> 'finalizada'", repartidorId);
+        return rutas[0] ?? null;
+    }
+
+    async buscarActivaParaActualizar(repartidorId) {
+        const resultado = await this.db.query(
+            "SELECT id FROM rutas WHERE repartidor_id = $1 AND estado <> 'finalizada'",
+            [repartidorId]
+        );
+        if (resultado.rows.length === 0) {
+            return null;
+        }
+        return this.buscarParaActualizar(resultado.rows[0].id);
+    }
+
+    async actualizarEstado(ruta) {
+        await this.db.query('UPDATE rutas SET estado = $1 WHERE id = $2', [ruta.estado, ruta.id]);
+    }
+
+    async listar(condicion, valor) {
         const resultado = await this.db.query(
             `SELECT r.id, r.estado, rep.nombre AS repartidor,
                     rp.orden, p.id AS pedido_id, p.cliente_nombre, p.direccion_destino,
@@ -63,9 +86,9 @@ class RutaRepositorio {
              JOIN repartidores rep ON rep.id = r.repartidor_id
              JOIN ruta_pedidos rp ON rp.ruta_id = r.id
              JOIN pedidos p ON p.id = rp.pedido_id
-             WHERE r.comercio_id = $1
+             WHERE ${condicion}
              ORDER BY r.id DESC, rp.orden NULLS LAST, p.id`,
-            [comercioId]
+            [valor]
         );
 
         const rutas = new Map();

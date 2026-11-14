@@ -16,6 +16,12 @@ class RepartidorRepositorio {
         return new Repartidor({ id: fila.id, nombre: fila.nombre, disponible: fila.disponible });
     }
 
+    async buscarParaActualizar(id) {
+        const resultado = await this.db.query('SELECT * FROM repartidores WHERE id = $1 FOR UPDATE', [id]);
+        const fila = resultado.rows[0];
+        return new Repartidor({ id: fila.id, nombre: fila.nombre, disponible: fila.disponible });
+    }
+
     async actualizar(repartidor) {
         await this.db.query('UPDATE repartidores SET disponible = $1 WHERE id = $2', [
             repartidor.estaDisponible(),

@@ -14,6 +14,9 @@ const ERRORES_CONOCIDOS = {
     "No hay pedidos pendientes": 409,
     "No hay repartidores disponibles": 409,
     "Servicio de rutas no disponible": 503,
+    "No tenes una ruta asignada": 404,
+    "Pedido no encontrado": 404,
+    "Transicion invalida": 409,
 };
 
 function leerPedido(body) {
@@ -43,7 +46,7 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solicitarRuta, secreto } = {}) {
+function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solicitarRuta, iniciarRuta, entregarPedido, secreto } = {}) {
     const app = express();
     const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
@@ -110,6 +113,24 @@ function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solic
     app.get("/comercio/rutas", requiereRol("comercio"), async (req, res) => {
         res.json(await rutas.listarPorComercio(req.usuario.comercioId));
     });
+
+    app.get("/repartidor/ruta", requiereRol("repartidor"), async (req, res) => {
+        res.json(await rutas.buscarActivaDeRepartidor(req.usuario.repartidorId));
+    });
+
+    app.post("/repartidor/ruta/iniciar", requiereRol("repartidor"), async (req, res) => {
+        const ruta = await iniciarRuta.ejecutar(req.usuario.repartidorId);
+        res.json({ id: ruta.id, estado: ruta.estado });
+    });
+
+    app.post("/repartidor/pedidos/:id/entregar", requiereRol("repartidor"), async (req, res) => {
+        const { pedido, rutaFinalizada } = await entregarPedido.ejecutar({
+            repartidorId: req.usuario.repartidorId,
+            pedidoId: Number(req.params.id),
+        });
+        res.json({ id: pedido.id, estado: pedido.obtenerEstado(), rutaFinalizada });
+    });
+
     app.use((error, req, res, next) => {
         if (res.headersSent) {
             return next(error);
