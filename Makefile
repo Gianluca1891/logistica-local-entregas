@@ -15,3 +15,4 @@ reset:
 
 demo:
 	docker compose exec -T db psql -U logistica < db/datos-demo.sql
+	docker compose exec -T redis redis-cli FLUSHALL

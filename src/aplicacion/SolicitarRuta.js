@@ -44,7 +44,11 @@ class SolicitarRuta {
                 longitud: pedido.longitudDestino,
             }));
             try {
-                await this.colaRutas.add('calcular', { rutaId: ruta.id, origen, paradas });
+                await this.colaRutas.add('calcular', 
+                    {rutaId: ruta.id,
+                    solicitudId: ruta.solicitudId,
+                    origen,
+                    paradas,});
             } catch {
                 throw new Error('Servicio de rutas no disponible');
             }
