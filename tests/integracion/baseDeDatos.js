@@ -18,4 +18,16 @@ async function crearComercio(nombre) {
     return comercio.rows[0].id;
 }
 
-module.exports = { pool, limpiarBase, crearComercio };
+async function crearRepartidor(nombre) {
+    const usuario = await pool.query(
+        "INSERT INTO usuarios (email, password_hash, rol) VALUES ($1, 'x', 'repartidor') RETURNING id",
+        [`${nombre}@test.com`]
+    );
+    const repartidor = await pool.query(
+        'INSERT INTO repartidores (usuario_id, nombre) VALUES ($1, $2) RETURNING id',
+        [usuario.rows[0].id, nombre]
+    );
+    return repartidor.rows[0].id;
+}
+
+module.exports = { pool, limpiarBase, crearComercio, crearRepartidor };

@@ -1,5 +1,8 @@
 const ProductoRepositorio = require('./ProductoRepositorio');
 const PedidoRepositorio = require('./PedidoRepositorio');
+const RepartidorRepositorio = require('./RepartidorRepositorio');
+const RutaRepositorio = require('./RutaRepositorio');
+const ComercioRepositorio = require('./ComercioRepositorio');
 
 class UnidadDeTrabajo {
     constructor(pool) {
@@ -13,6 +16,9 @@ class UnidadDeTrabajo {
             const repositorios = {
                 productos: new ProductoRepositorio(cliente),
                 pedidos: new PedidoRepositorio(cliente),
+                repartidores: new RepartidorRepositorio(cliente),
+                rutas: new RutaRepositorio(cliente),
+                comercios: new ComercioRepositorio(cliente),
             };
             const resultado = await trabajo(repositorios);
             await cliente.query('COMMIT');
