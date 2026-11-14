@@ -11,6 +11,9 @@ const ERRORES_CONOCIDOS = {
     "Cantidad invalida": 400,
     "Stock insuficiente": 400,
     "Credenciales invalidas": 401,
+    "No hay pedidos pendientes": 409,
+    "No hay repartidores disponibles": 409,
+    "Servicio de rutas no disponible": 503,
 };
 
 function leerPedido(body) {
@@ -40,7 +43,7 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido, pedidos, productos, iniciarSesion, secreto } = {}) {
+function crearApp({ crearPedido, pedidos, productos, iniciarSesion, solicitarRuta, secreto } = {}) {
     const app = express();
     const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
@@ -100,6 +103,10 @@ function crearApp({ crearPedido, pedidos, productos, iniciarSesion, secreto } = 
         );
     });
 
+    app.post("/comercio/rutas", requiereRol("comercio"), async (req, res) => {
+        const ruta = await solicitarRuta.ejecutar(req.usuario.comercioId);
+        res.status(202).json({ id: ruta.id, estado: ruta.estado, repartidorId: ruta.repartidorId });
+    });
     app.use((error, req, res, next) => {
         if (res.headersSent) {
             return next(error);
