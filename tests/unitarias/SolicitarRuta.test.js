@@ -72,6 +72,7 @@ describe('SolicitarRuta', () => {
         expect(dobles.encolados).toEqual([
             {
                 rutaId: 50,
+                solicitudId: 'solicitud-1',
                 origen: { latitud: -34.58, longitud: -58.41 },
                 paradas: [
                     { id: 1, latitud: -34.6, longitud: -58.4 },

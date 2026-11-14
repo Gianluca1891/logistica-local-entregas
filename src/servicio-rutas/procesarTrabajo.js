@@ -5,13 +5,23 @@ function esPunto(punto) {
 }
 
 async function procesarTrabajo(datos, resultados) {
-    const { rutaId, origen, paradas } = datos;
-    if (!esPunto(origen) || !Array.isArray(paradas) || paradas.length === 0 || !paradas.every(esPunto)) {
+    const { rutaId, solicitudId, origen, paradas } = datos;
+    if (
+        !solicitudId ||
+        !esPunto(origen) ||
+        !Array.isArray(paradas) ||
+        paradas.length === 0 ||
+        !paradas.every(esPunto)
+    ) {
         throw new Error('Trabajo invalido');
     }
 
     const orden = calcularRuta(origen, paradas);
-    await resultados.add('resultado', { rutaId, orden }, { jobId: `ruta-${rutaId}` });
+    await resultados.add(
+        'resultado',
+        { rutaId, orden },
+        { jobId: `resultado-${solicitudId}`, attempts: 3, backoff: { type: 'fixed', delay: 1000 } }
+    );
     return orden;
 }
 

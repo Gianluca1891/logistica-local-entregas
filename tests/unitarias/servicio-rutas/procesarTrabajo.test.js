@@ -12,6 +12,7 @@ function crearColaFalsa() {
 
 const datosValidos = {
     rutaId: 5,
+    solicitudId: 'solicitud-5',
     origen: { latitud: 0, longitud: 0 },
     paradas: [
         { id: 20, latitud: 0, longitud: 0.02 },
@@ -27,7 +28,11 @@ describe('procesarTrabajo', () => {
 
         expect(orden).toEqual([10, 20]);
         expect(resultados.agregados).toEqual([
-            { nombre: 'resultado', datos: { rutaId: 5, orden: [10, 20] }, opciones: { jobId: 'ruta-5' } },
+            {
+                nombre: 'resultado',
+                datos: { rutaId: 5, orden: [10, 20] },
+                opciones: { jobId: 'resultado-solicitud-5', attempts: 3, backoff: { type: 'fixed', delay: 1000 } },
+            },
         ]);
     });
 
