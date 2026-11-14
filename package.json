@@ -4,6 +4,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "servicio-rutas": "node src/servicio-rutas/index.js",
     "test": "jest tests/unitarias",
     "test:integracion": "jest tests/integracion --runInBand",
     "lint": "eslint ."
@@ -24,7 +25,9 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "bullmq": "^6.7.6",
     "express": "^5.3.0",
+    "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.1"
   }
