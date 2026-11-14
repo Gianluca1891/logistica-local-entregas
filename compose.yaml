@@ -11,5 +11,17 @@ services:
       - datos-db:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
 
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - datos-redis:/data
+
 volumes:
   datos-db:
+  datos-redis:
+
+
+
