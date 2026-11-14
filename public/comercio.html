@@ -9,6 +9,7 @@
     <body>
         <h1>Mis pedidos</h1>
         <button id="salir">Cerrar sesión</button>
+        <button id="actualizar">Actualizar</button>
 
         <section>
             <p id="error" class="error"></p>
@@ -24,6 +25,14 @@
                 </thead>
                 <tbody id="pedidos"></tbody>
             </table>
+        </section>
+
+        <section>
+            <h2>Mis rutas</h2>
+            <button id="solicitar">Solicitar ruta con los pedidos pendientes</button>
+            <p id="error-ruta" class="error"></p>
+            <p id="mensaje-ruta"></p>
+            <div id="rutas"></div>
         </section>
 
         <script type="module" src="comercio.js"></script>

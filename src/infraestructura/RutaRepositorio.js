@@ -53,6 +53,38 @@ class RutaRepositorio {
         }
         await this.db.query('UPDATE rutas SET estado = $1 WHERE id = $2', [ruta.estado, ruta.id]);
     }
+    
+    async listarPorComercio(comercioId) {
+        const resultado = await this.db.query(
+            `SELECT r.id, r.estado, rep.nombre AS repartidor,
+                    rp.orden, p.id AS pedido_id, p.cliente_nombre, p.direccion_destino,
+                    p.latitud_destino, p.longitud_destino, p.estado AS pedido_estado
+             FROM rutas r
+             JOIN repartidores rep ON rep.id = r.repartidor_id
+             JOIN ruta_pedidos rp ON rp.ruta_id = r.id
+             JOIN pedidos p ON p.id = rp.pedido_id
+             WHERE r.comercio_id = $1
+             ORDER BY r.id DESC, rp.orden NULLS LAST, p.id`,
+            [comercioId]
+        );
+
+        const rutas = new Map();
+        for (const fila of resultado.rows) {
+            if (!rutas.has(fila.id)) {
+                rutas.set(fila.id, { id: fila.id, estado: fila.estado, repartidor: fila.repartidor, paradas: [] });
+            }
+            rutas.get(fila.id).paradas.push({
+                orden: fila.orden,
+                pedidoId: fila.pedido_id,
+                nombreCliente: fila.cliente_nombre,
+                direccionDestino: fila.direccion_destino,
+                latitud: fila.latitud_destino,
+                longitud: fila.longitud_destino,
+                estado: fila.pedido_estado,
+            });
+        }
+        return [...rutas.values()];
+    }
 }
 
 module.exports = RutaRepositorio;
