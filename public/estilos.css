@@ -53,3 +53,9 @@ td {
 .error {
     color: #b00020;
 }
+
+
+#mapa {
+    height: 320px;
+    margin-top: 12px;
+}

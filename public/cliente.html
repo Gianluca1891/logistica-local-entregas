@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Cliente - Logística local</title>
+        <link rel="stylesheet" href="leaflet/leaflet.css" />
         <link rel="stylesheet" href="estilos.css" />
     </head>
     <body>
@@ -63,8 +64,10 @@
             <p id="error-rastreo" class="error"></p>
             <p id="estado"></p>
             <p id="en-vivo"></p>
+            <p id="actualizado"></p>
+            <div id="mapa" hidden></div>
         </form>
-
+        <script src="leaflet/leaflet.js"></script>
         <script type="module" src="cliente.js"></script>
     </body>
 </html>

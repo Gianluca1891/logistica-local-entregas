@@ -68,4 +68,40 @@ describe('Endpoints del repartidor', () => {
 
         expect(respuesta.status).toBe(409);
     });
+        test('POST /repartidor/posicion guarda la posicion y la avisa a los pedidos de la ruta', async () => {
+        const registrarPosicion = {
+            ejecutar: async (datos) => ({
+                ruta: { rutaPedidos: [{ pedidoId: 10 }, { pedidoId: 20 }] },
+                posicion: { latitud: datos.latitud, longitud: datos.longitud, registradoEn: '2026-11-16T12:00:00.000Z' },
+            }),
+        };
+        const publicados = [];
+        const tiempoReal = { publicar: (pedidoIds, mensaje) => publicados.push([pedidoIds, mensaje]) };
+        const app = crearApp({ registrarPosicion, tiempoReal, secreto: SECRETO });
+
+        const respuesta = await request(app)
+            .post('/repartidor/posicion')
+            .set('Authorization', `Bearer ${tokenJuan}`)
+            .send({ latitud: -34.6, longitud: -58.4 });
+
+        expect(respuesta.status).toBe(201);
+        expect(respuesta.body).toEqual({ latitud: -34.6, longitud: -58.4 });
+        expect(publicados).toEqual([
+            [[10, 20], { tipo: 'posicion', latitud: -34.6, longitud: -58.4, registradoEn: '2026-11-16T12:00:00.000Z' }],
+        ]);
+    });
+
+    test('responde 400 si las coordenadas vienen vacias', async () => {
+        const RegistrarPosicion = require('../../../src/aplicacion/RegistrarPosicion');
+        const registrarPosicion = new RegistrarPosicion({ unidadDeTrabajo: {} });
+        const app = crearApp({ registrarPosicion, secreto: SECRETO });
+
+        const respuesta = await request(app)
+            .post('/repartidor/posicion')
+            .set('Authorization', `Bearer ${tokenJuan}`)
+            .send({ latitud: '', longitud: null });
+
+        expect(respuesta.status).toBe(400);
+        expect(respuesta.body).toEqual({ error: 'Coordenadas invalidas' });
+    });
 });

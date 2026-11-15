@@ -9,4 +9,10 @@ describe('Front', () => {
         expect(respuesta.headers['content-type']).toMatch(/html/);
         expect(respuesta.text).toContain('Iniciar sesión');
     });
+
+    test('sirve Leaflet desde el propio servidor', async () => {
+        const respuesta = await request(crearApp()).get('/leaflet/leaflet.js');
+
+        expect(respuesta.status).toBe(200);
+    });
 });

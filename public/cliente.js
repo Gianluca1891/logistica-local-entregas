@@ -1,3 +1,4 @@
+/* global L */
 import { llamarApi } from './comun.js';
 
 const formPedido = document.getElementById('pedido');
@@ -10,10 +11,15 @@ const formRastreo = document.getElementById('rastreo');
 const errorRastreo = document.getElementById('error-rastreo');
 const estado = document.getElementById('estado');
 const enVivo = document.getElementById('en-vivo');
+const contenedorMapa = document.getElementById('mapa');
+const actualizado = document.getElementById('actualizado');
 
 let productos = [];
 let pedidoSeguido = null;
 let socket = null;
+let mapa = null;
+let marcadorDestino = null;
+let marcadorRepartidor = null;
 
 function mostrarProductos() {
     const comercioId = Number(selectComercio.value);
@@ -92,14 +98,58 @@ function mostrarSeguimiento() {
     estado.textContent = `Pedido #${pedidoSeguido.pedidoId}: ${pedidoSeguido.estado} (entrega en ${pedidoSeguido.direccionDestino})`;
 }
 
+function mostrarRepartidor() {
+    if (!mapa) {
+        return;
+    }
+    const posicion = pedidoSeguido.estado === 'entregado' ? null : pedidoSeguido.posicion;
+    if (!posicion) {
+        marcadorRepartidor?.remove();
+        marcadorRepartidor = null;
+        actualizado.textContent = '';
+        return;
+    }
+    actualizado.textContent = `Última ubicación del repartidor: ${new Date(posicion.registradoEn).toLocaleTimeString()}`;
+    const punto = [posicion.latitud, posicion.longitud];
+    if (marcadorRepartidor) {
+        marcadorRepartidor.setLatLng(punto);
+    } else {
+        marcadorRepartidor = L.circleMarker(punto, { radius: 9, color: '#b00020' }).addTo(mapa).bindTooltip('Repartidor');
+    }
+}
+
+function mostrarMapa() {
+    if (!window.L) {
+        return;
+    }
+    const destino = [pedidoSeguido.latitudDestino, pedidoSeguido.longitudDestino];
+    contenedorMapa.hidden = false;
+    if (!mapa) {
+        mapa = L.map(contenedorMapa);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap',
+        }).addTo(mapa);
+        marcadorDestino = L.marker(destino).addTo(mapa).bindTooltip('Tu dirección');
+    }
+    marcadorDestino.setLatLng(destino);
+    mapa.setView(destino, 14);
+    mostrarRepartidor();
+}
+
 function alRecibirMensaje(evento) {
     const mensaje = JSON.parse(evento.data);
     if (mensaje.tipo === 'seguimiento') {
         pedidoSeguido = mensaje;
         mostrarSeguimiento();
+        mostrarMapa();
     } else if (mensaje.tipo === 'estado' && pedidoSeguido) {
         pedidoSeguido.estado = mensaje.estado;
         mostrarSeguimiento();
+        mostrarRepartidor();
+    } else if (mensaje.tipo === 'posicion' && pedidoSeguido) {
+        pedidoSeguido.posicion = mensaje;
+        mostrarRepartidor();
     } else if (mensaje.tipo === 'error') {
         errorRastreo.textContent = mensaje.error;
     }
@@ -115,7 +165,7 @@ function conectar(token) {
     });
     nuevo.addEventListener('message', alRecibirMensaje);
     nuevo.addEventListener('close', () => {
-        if (socket !== nuevo) {
+        if (socket !== nuevo || pedidoSeguido?.estado === 'entregado') {
             return;
         }
         enVivo.textContent = '🔴 Conexión perdida, reconectando...';

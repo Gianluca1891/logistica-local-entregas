@@ -65,7 +65,16 @@ class PedidoRepositorio {
 
     async buscarSeguimiento(token) {
         const resultado = await this.db.query(
-            'SELECT id, estado, direccion_destino, latitud_destino, longitud_destino FROM pedidos WHERE token = $1',
+            `SELECT p.id, p.estado, p.direccion_destino, p.latitud_destino, p.longitud_destino,
+                    pos.latitud AS posicion_latitud, pos.longitud AS posicion_longitud, pos.registrado_en
+             FROM pedidos p
+             LEFT JOIN ruta_pedidos rp ON rp.pedido_id = p.id
+             LEFT JOIN LATERAL (
+                 SELECT latitud, longitud, registrado_en FROM posiciones
+                 WHERE ruta_id = rp.ruta_id AND p.estado = 'retirado'
+                 ORDER BY id DESC LIMIT 1
+             ) pos ON TRUE
+             WHERE p.token = $1`,
             [token]
         );
         if (resultado.rows.length === 0) {
@@ -78,6 +87,14 @@ class PedidoRepositorio {
             direccionDestino: fila.direccion_destino,
             latitudDestino: fila.latitud_destino,
             longitudDestino: fila.longitud_destino,
+            posicion:
+                fila.posicion_latitud === null
+                    ? null
+                    : {
+                          latitud: fila.posicion_latitud,
+                          longitud: fila.posicion_longitud,
+                          registradoEn: fila.registrado_en,
+                      },
         };
     }
 
