@@ -46,7 +46,22 @@ function leerPedido(body) {
     return datos;
 }
 
-function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solicitarRuta, iniciarRuta, entregarPedido, secreto } = {}) {
+function idsDePedidos(ruta) {
+    return ruta.rutaPedidos.map((rutaPedido) => rutaPedido.pedidoId);
+}
+
+function crearApp({
+    crearPedido,
+    pedidos,
+    productos,
+    rutas,
+    iniciarSesion,
+    solicitarRuta,
+    iniciarRuta,
+    entregarPedido,
+    secreto,
+    tiempoReal = { publicar: () => {} },
+    } = {}) {
     const app = express();
     const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
@@ -108,6 +123,7 @@ function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solic
 
     app.post("/comercio/rutas", requiereRol("comercio"), async (req, res) => {
         const ruta = await solicitarRuta.ejecutar(req.usuario.comercioId);
+        tiempoReal.publicar(idsDePedidos(ruta), { tipo: "estado", estado: "asignado" });
         res.status(202).json({ id: ruta.id, estado: ruta.estado, repartidorId: ruta.repartidorId });
     });
     app.get("/comercio/rutas", requiereRol("comercio"), async (req, res) => {
@@ -120,6 +136,7 @@ function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solic
 
     app.post("/repartidor/ruta/iniciar", requiereRol("repartidor"), async (req, res) => {
         const ruta = await iniciarRuta.ejecutar(req.usuario.repartidorId);
+        tiempoReal.publicar(idsDePedidos(ruta), { tipo: "estado", estado: "retirado" });
         res.json({ id: ruta.id, estado: ruta.estado });
     });
 
@@ -128,6 +145,7 @@ function crearApp({ crearPedido, pedidos, productos, rutas, iniciarSesion, solic
             repartidorId: req.usuario.repartidorId,
             pedidoId: Number(req.params.id),
         });
+        tiempoReal.publicar([pedido.id], { tipo: "estado", estado: pedido.obtenerEstado() });
         res.json({ id: pedido.id, estado: pedido.obtenerEstado(), rutaFinalizada });
     });
 

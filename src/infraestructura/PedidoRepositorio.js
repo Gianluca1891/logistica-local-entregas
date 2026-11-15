@@ -63,6 +63,24 @@ class PedidoRepositorio {
         return resultado.rows.map(aPedido);
     }
 
+    async buscarSeguimiento(token) {
+        const resultado = await this.db.query(
+            'SELECT id, estado, direccion_destino, latitud_destino, longitud_destino FROM pedidos WHERE token = $1',
+            [token]
+        );
+        if (resultado.rows.length === 0) {
+            return null;
+        }
+        const fila = resultado.rows[0];
+        return {
+            pedidoId: fila.id,
+            estado: fila.estado,
+            direccionDestino: fila.direccion_destino,
+            latitudDestino: fila.latitud_destino,
+            longitudDestino: fila.longitud_destino,
+        };
+    }
+
     async buscarPendientesParaActualizar(comercioId) {
         const resultado = await this.db.query(
             "SELECT * FROM pedidos WHERE comercio_id = $1 AND estado = 'pendiente' ORDER BY id FOR UPDATE",

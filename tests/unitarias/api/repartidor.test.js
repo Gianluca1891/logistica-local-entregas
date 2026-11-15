@@ -32,7 +32,7 @@ describe('Endpoints del repartidor', () => {
         expect(respuesta.status).toBe(403);
     });
 
-    test('POST /repartidor/pedidos/:id/entregar entrega el pedido', async () => {
+    test('POST /repartidor/pedidos/:id/entregar entrega el pedido y avisa por WebSocket', async () => {
         const recibidos = [];
         const entregarPedido = {
             ejecutar: async (datos) => {
@@ -40,7 +40,9 @@ describe('Endpoints del repartidor', () => {
                 return { pedido: { id: 10, obtenerEstado: () => 'entregado' }, rutaFinalizada: true };
             },
         };
-        const app = crearApp({ entregarPedido, secreto: SECRETO });
+        const publicados = [];
+        const tiempoReal = { publicar: (pedidoIds, mensaje) => publicados.push([pedidoIds, mensaje]) };
+        const app = crearApp({ entregarPedido, tiempoReal, secreto: SECRETO });
 
         const respuesta = await request(app)
             .post('/repartidor/pedidos/10/entregar')
@@ -49,6 +51,7 @@ describe('Endpoints del repartidor', () => {
         expect(respuesta.status).toBe(200);
         expect(respuesta.body).toEqual({ id: 10, estado: 'entregado', rutaFinalizada: true });
         expect(recibidos).toEqual([{ repartidorId: 1, pedidoId: 10 }]);
+        expect(publicados).toEqual([[[10], { tipo: 'estado', estado: 'entregado' }]]);
     });
 
     test('responde 409 si se intenta entregar dos veces', async () => {

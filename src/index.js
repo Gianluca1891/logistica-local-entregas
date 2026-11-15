@@ -13,6 +13,7 @@ const AplicarOrdenDeRuta = require('./aplicacion/AplicarOrdenDeRuta');
 const IniciarRuta = require('./aplicacion/IniciarRuta');
 const EntregarPedido = require('./aplicacion/EntregarPedido');
 const crearApp = require('./api/app');
+const crearTiempoReal = require('./api/tiempoReal');
 
 const secreto = process.env.JWT_SECRETO || 'secreto-solo-para-desarrollo';
 const unidadDeTrabajo = new UnidadDeTrabajo(pool);
@@ -33,6 +34,7 @@ rutasCalculadas.on('failed', (trabajo, error) => console.error(`No se pudo guard
 rutasCalculadas.on('error', (error) => console.error('Error en el worker de rutas:', error.code || error.message));
 const iniciarRuta = new IniciarRuta({ unidadDeTrabajo });
 const entregarPedido = new EntregarPedido({ unidadDeTrabajo });
+const tiempoReal = crearTiempoReal({ buscarSeguimiento: (token) => pedidos.buscarSeguimiento(token) });
 const app = crearApp({
     crearPedido,
     pedidos,
@@ -43,9 +45,11 @@ const app = crearApp({
     iniciarRuta,
     entregarPedido,
     secreto,
+    tiempoReal,
 });
 
 const puerto = process.env.PORT || 3000;
-app.listen(puerto, () => {
+const servidor = app.listen(puerto, () => {
     console.log(`API escuchando en http://localhost:${puerto}`);
 });
+tiempoReal.adjuntar(servidor);

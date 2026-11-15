@@ -18,7 +18,12 @@ function crearSolicitarRutaFalso(comportamiento) {
 
 describe('POST /comercio/rutas', () => {
     test('responde 202 con la ruta pendiente del comercio del token', async () => {
-        const solicitarRuta = crearSolicitarRutaFalso(() => ({ id: 9, estado: 'pendiente', repartidorId: 2 }));
+        const solicitarRuta = crearSolicitarRutaFalso(() => ({
+            id: 9,
+            estado: 'pendiente',
+            repartidorId: 2,
+            rutaPedidos: [{ pedidoId: 4 }],
+        }));
         const app = crearApp({ solicitarRuta, secreto: SECRETO });
 
         const respuesta = await request(app)
