@@ -12,6 +12,7 @@ const SolicitarRuta = require('./aplicacion/SolicitarRuta');
 const AplicarOrdenDeRuta = require('./aplicacion/AplicarOrdenDeRuta');
 const IniciarRuta = require('./aplicacion/IniciarRuta');
 const EntregarPedido = require('./aplicacion/EntregarPedido');
+const RegistrarPosicion = require('./aplicacion/RegistrarPosicion');
 const crearApp = require('./api/app');
 const crearTiempoReal = require('./api/tiempoReal');
 
@@ -34,6 +35,7 @@ rutasCalculadas.on('failed', (trabajo, error) => console.error(`No se pudo guard
 rutasCalculadas.on('error', (error) => console.error('Error en el worker de rutas:', error.code || error.message));
 const iniciarRuta = new IniciarRuta({ unidadDeTrabajo });
 const entregarPedido = new EntregarPedido({ unidadDeTrabajo });
+const registrarPosicion = new RegistrarPosicion({ unidadDeTrabajo });
 const tiempoReal = crearTiempoReal({ buscarSeguimiento: (token) => pedidos.buscarSeguimiento(token) });
 const app = crearApp({
     crearPedido,
@@ -44,6 +46,7 @@ const app = crearApp({
     solicitarRuta,
     iniciarRuta,
     entregarPedido,
+    registrarPosicion,
     secreto,
     tiempoReal,
 });

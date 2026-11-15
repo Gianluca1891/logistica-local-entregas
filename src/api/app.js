@@ -17,6 +17,8 @@ const ERRORES_CONOCIDOS = {
     "No tenes una ruta asignada": 404,
     "Pedido no encontrado": 404,
     "Transicion invalida": 409,
+    "Coordenadas invalidas": 400,
+    "La ruta no esta en curso": 409,
 };
 
 function leerPedido(body) {
@@ -59,13 +61,15 @@ function crearApp({
     solicitarRuta,
     iniciarRuta,
     entregarPedido,
+    registrarPosicion,
     secreto,
     tiempoReal = { publicar: () => {} },
-    } = {}) {
+} = {}) {
     const app = express();
     const requiereRol = crearAutenticacion(secreto);
     app.use(express.json());
     app.use(express.static(path.join(__dirname, "../../public")));
+    app.use("/leaflet", express.static(path.join(__dirname, "../../node_modules/leaflet/dist")));
 
     app.get("/salud", (req, res) => {
         res.json({ estado: "ok" });
@@ -147,6 +151,21 @@ function crearApp({
         });
         tiempoReal.publicar([pedido.id], { tipo: "estado", estado: pedido.obtenerEstado() });
         res.json({ id: pedido.id, estado: pedido.obtenerEstado(), rutaFinalizada });
+    });
+
+    app.post("/repartidor/posicion", requiereRol("repartidor"), async (req, res) => {
+        const { ruta, posicion } = await registrarPosicion.ejecutar({
+            repartidorId: req.usuario.repartidorId,
+            latitud: req.body?.latitud,
+            longitud: req.body?.longitud,
+        });
+        tiempoReal.publicar(idsDePedidos(ruta), {
+            tipo: "posicion",
+            latitud: posicion.latitud,
+            longitud: posicion.longitud,
+            registradoEn: posicion.registradoEn,
+        });
+        res.status(201).json({ latitud: posicion.latitud, longitud: posicion.longitud });
     });
 
     app.use((error, req, res, next) => {

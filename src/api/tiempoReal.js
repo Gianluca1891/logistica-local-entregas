@@ -32,8 +32,10 @@ function crearTiempoReal({ buscarSeguimiento }) {
             if (!seguimiento) {
                 return enviar(socket, { tipo: 'error', error: 'Pedido no encontrado' });
             }
-            suscribir(socket, seguimiento.pedidoId);
             enviar(socket, { tipo: 'seguimiento', ...seguimiento });
+            if (seguimiento.estado !== 'entregado') {
+                suscribir(socket, seguimiento.pedidoId);
+            }
         } catch (error) {
             console.error('Error al suscribir por WebSocket:', error.message);
             enviar(socket, { tipo: 'error', error: 'Error interno' });
@@ -53,6 +55,9 @@ function crearTiempoReal({ buscarSeguimiento }) {
         for (const pedidoId of pedidoIds) {
             for (const socket of suscriptores.get(pedidoId) ?? []) {
                 enviar(socket, mensaje);
+            }
+            if (mensaje.estado === 'entregado') {
+                suscriptores.delete(pedidoId);
             }
         }
     }

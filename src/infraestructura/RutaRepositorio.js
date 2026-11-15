@@ -1,6 +1,13 @@
 const Ruta = require('../dominio/Ruta');
 const RutaPedido = require('../dominio/RutaPedido');
 
+function armarPosicion(fila) {
+    if (fila.posicion_latitud === null) {
+        return null;
+    }
+    return { latitud: fila.posicion_latitud, longitud: fila.posicion_longitud };
+}
+
 class RutaRepositorio {
     constructor(db) {
         this.db = db;
@@ -79,22 +86,35 @@ class RutaRepositorio {
 
     async listar(condicion, valor) {
         const resultado = await this.db.query(
-            `SELECT r.id, r.estado, rep.nombre AS repartidor,
+                        `SELECT r.id, r.estado, rep.nombre AS repartidor,
+                    c.latitud AS origen_latitud, c.longitud AS origen_longitud,
+                    pos.latitud AS posicion_latitud, pos.longitud AS posicion_longitud,
                     rp.orden, p.id AS pedido_id, p.cliente_nombre, p.direccion_destino,
                     p.latitud_destino, p.longitud_destino, p.estado AS pedido_estado
              FROM rutas r
              JOIN repartidores rep ON rep.id = r.repartidor_id
+             JOIN comercios c ON c.id = r.comercio_id
              JOIN ruta_pedidos rp ON rp.ruta_id = r.id
              JOIN pedidos p ON p.id = rp.pedido_id
+             LEFT JOIN LATERAL (
+                 SELECT latitud, longitud FROM posiciones WHERE ruta_id = r.id ORDER BY id DESC LIMIT 1
+             ) pos ON TRUE
              WHERE ${condicion}
              ORDER BY r.id DESC, rp.orden NULLS LAST, p.id`,
             [valor]
         );
 
-        const rutas = new Map();
+    const rutas = new Map();
         for (const fila of resultado.rows) {
             if (!rutas.has(fila.id)) {
-                rutas.set(fila.id, { id: fila.id, estado: fila.estado, repartidor: fila.repartidor, paradas: [] });
+                rutas.set(fila.id, {
+                    id: fila.id,
+                    estado: fila.estado,
+                    repartidor: fila.repartidor,
+                    origen: { latitud: fila.origen_latitud, longitud: fila.origen_longitud },
+                    posicion: armarPosicion(fila),
+                    paradas: [],
+                });
             }
             rutas.get(fila.id).paradas.push({
                 orden: fila.orden,
