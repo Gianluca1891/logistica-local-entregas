@@ -9,8 +9,11 @@ const resultado = document.getElementById('resultado');
 const formRastreo = document.getElementById('rastreo');
 const errorRastreo = document.getElementById('error-rastreo');
 const estado = document.getElementById('estado');
+const enVivo = document.getElementById('en-vivo');
 
 let productos = [];
+let pedidoSeguido = null;
+let socket = null;
 
 function mostrarProductos() {
     const comercioId = Number(selectComercio.value);
@@ -85,21 +88,60 @@ formPedido.addEventListener('submit', async (evento) => {
     }
 });
 
-formRastreo.addEventListener('submit', async (evento) => {
+function mostrarSeguimiento() {
+    estado.textContent = `Pedido #${pedidoSeguido.pedidoId}: ${pedidoSeguido.estado} (entrega en ${pedidoSeguido.direccionDestino})`;
+}
+
+function alRecibirMensaje(evento) {
+    const mensaje = JSON.parse(evento.data);
+    if (mensaje.tipo === 'seguimiento') {
+        pedidoSeguido = mensaje;
+        mostrarSeguimiento();
+    } else if (mensaje.tipo === 'estado' && pedidoSeguido) {
+        pedidoSeguido.estado = mensaje.estado;
+        mostrarSeguimiento();
+    } else if (mensaje.tipo === 'error') {
+        errorRastreo.textContent = mensaje.error;
+    }
+}
+
+function conectar(token) {
+    const protocolo = location.protocol === 'https:' ? 'wss' : 'ws';
+    const nuevo = new WebSocket(`${protocolo}://${location.host}/ws`);
+    socket = nuevo;
+    nuevo.addEventListener('open', () => {
+        enVivo.textContent = '🟢 Siguiendo en vivo';
+        nuevo.send(JSON.stringify({ tipo: 'suscribir', token }));
+    });
+    nuevo.addEventListener('message', alRecibirMensaje);
+    nuevo.addEventListener('close', () => {
+        if (socket !== nuevo) {
+            return;
+        }
+        enVivo.textContent = '🔴 Conexión perdida, reconectando...';
+        setTimeout(() => {
+            if (socket === nuevo) {
+                conectar(token);
+            }
+        }, 2000);
+    });
+}
+
+function seguir(token) {
+    const anterior = socket;
+    socket = null;
+    anterior?.close();
+    pedidoSeguido = null;
+    conectar(token);
+}
+
+formRastreo.addEventListener('submit', (evento) => {
     evento.preventDefault();
-    const boton = formRastreo.querySelector('button');
-    boton.disabled = true;
     errorRastreo.textContent = '';
     estado.textContent = '';
-
-    try {
-        const token = encodeURIComponent(formRastreo.token.value.trim());
-        const pedido = await llamarApi('GET', `/pedidos/${token}`);
-        estado.textContent = `Pedido #${pedido.id}: ${pedido.estado} (entrega en ${pedido.direccionDestino})`;
-    } catch (e) {
-        errorRastreo.textContent = e.message;
-    } finally {
-        boton.disabled = false;
+    const token = formRastreo.token.value.trim();
+    if (token) {
+        seguir(token);
     }
 });
 
