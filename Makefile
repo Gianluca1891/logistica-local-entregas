@@ -1,4 +1,4 @@
-.PHONY: build shell down reset demo
+.PHONY: build shell down reset demo logs
 
 build:
 	docker compose up -d --build
@@ -16,3 +16,6 @@ reset:
 demo:
 	docker compose exec -T db psql -U logistica < db/datos-demo.sql
 	docker compose exec -T redis redis-cli FLUSHALL
+
+logs:
+	docker compose logs -f api servicio-rutas
