@@ -150,8 +150,12 @@ function alRecibirMensaje(evento) {
     } else if (mensaje.tipo === 'posicion' && pedidoSeguido) {
         pedidoSeguido.posicion = mensaje;
         mostrarRepartidor();
-    } else if (mensaje.tipo === 'error') {
+        } else if (mensaje.tipo === 'error') {
         errorRastreo.textContent = mensaje.error;
+        enVivo.textContent = '';
+        contenedorMapa.hidden = true;
+        socket = null;
+        evento.target.close();
     }
 }
 
